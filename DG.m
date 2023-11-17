@@ -1,4 +1,4 @@
-function [A,V,Dr,Ds,u,ux,uy] = DG(xl,xr,yl,yr,Mx,My,N)
+function [A,V,Dr,Ds,u,ux,uy,c4n2] = DG(xl,xr,yl,yr,Mx,My,N)
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,inddb,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 [x,y]=Nodes2D_equi(N);
