@@ -1,0 +1,39 @@
+function A = ajp(xl,xr,yl,yr,Mx,My,N)
+
+% xl=0;xr=1;yl=0;yr=1;Mx=2;My=2;N=1;
+[c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
+ind4s=edge(n4e,N);
+e4s = computeE4s(n4e);
+n4s = computeN4s(n4e);
+
+A=zeros(size(e4s,1),size(e4s,1));
+
+%% sigma=4n^2 구하기, 중복항 지우기, index맞추기 
+
+
+for j=1:size(e4s,1)
+    if e4s(j,2)~=0
+    n=normal(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
+    h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
+
+    A(ind4s(j,:,1),ind4s(j,:,1))=A(ind4s(j,:,1),ind4s(j,:,1))...
+        +(-1/2)*J*((rx*M*Dr+sx*M*Ds)*n(1)+(ry*M*Dr+sy*M*Ds)*n(2))...
+        +(-1/2)*J*((rx*Dr'*M+sx*Ds'*M)*n(1)+(ry*Dr'*M+sy*Ds'*M)*n(2))...
+        +(4*n^2/h)*J*M;
+
+    A(ind4s(j,:,2),ind4s(j,:,1))=A(ind4s(j,:,2),ind4s(j,:,1))...
+        +(1/2)*J*((rx*M*Dr+sx*M*Ds)*n(1)+(ry*M*Dr+sy*M*Ds)*n(2))...
+        +(-1/2)*J*((rx*Dr'*M+sx*Ds'*M)*n(1)+(ry*Dr'*M+sy*Ds'*M)*n(2))...
+        +(4*n^2/h)*J*M;
+    
+    A(ind4s(j,:,1),ind4s(j,:,2))=A(ind4s(j,:,1),ind4s(j,:,2))...
+        +(-1/2)*J*((rx*M*Dr+sx*M*Ds)*n(1)+(ry*M*Dr+sy*M*Ds)*n(2))...
+        +(-1/2)*J*((rx*Dr'*M+sx*Ds'*M)*n(1)+(ry*Dr'*M+sy*Ds'*M)*n(2))...
+        +(4*n^2/h)*J*M;
+    
+    A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))...
+        +(1/2)*J*((rx*M*Dr+sx*M*Ds)*n(1)+(ry*M*Dr+sy*M*Ds)*n(2))...
+        +(-1/2)*J*((rx*Dr'*M+sx*Ds'*M)*n(1)+(ry*Dr'*M+sy*Ds'*M)*n(2))...
+        +(4*n^2/h)*J*M;
+    end
+end
