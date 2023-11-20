@@ -3,7 +3,7 @@ function [A]=lineint2(xl,xr,yl,yr,Mx,My,N)
 [V] = Vandermonde1D(N,r);
 I = eye(size(V,1));
 
-[ind4e,~,c4n2] = indexforDG2(xl,xr,yl,yr,Mx,My,N);
+[ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 ind4s=edge(n4e,N);
