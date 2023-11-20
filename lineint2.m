@@ -3,7 +3,7 @@ function [A]=lineint2(xl,xr,yl,yr,Mx,My,N)
 [V] = Vandermonde1D(N,r);
 I = eye(size(V,1));
 
-[ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
+[ind4e,~,c4n2] = indexforDG2(xl,xr,yl,yr,Mx,My,N);
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 ind4s=edge(n4e,N);
@@ -26,6 +26,7 @@ J = xr.*ys-xs.*yr;
 rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
+sigma=4*(N^2);
 for j=1:size(e4s,1)
     if e4s(j,2)~=0
     n=normal(c4n2(ind4s(j,1,1),:)-c4n2(ind4s(j,N+1,1),:));
@@ -43,9 +44,9 @@ for j=1:size(e4s,1)
     A(ind4e(e4s(j,1),:),ind4s(j,:,2))=A(ind4e(e4s(j,1),:),ind4s(j,:,2))+(1/2)*(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2));
     A(ind4e(e4s(j,2),:),ind4s(j,:,2))=A(ind4e(e4s(j,2),:),ind4s(j,:,2))+(1/2)*(h/2)*((rx(e4s(j,2))*Dr(en(j,:,2),:)'*M+sx(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(1)+(ry(e4s(j,2))*Dr(en(j,:,2),:)'*M+sy(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(2));
 
-    A(ind4s(j,:,1),ind4s(j,:,1))=A(ind4s(j,:,1),ind4s(j,:,1))+(4*N^2/h)*(h/2)*M;
-    A(ind4s(j,:,2),ind4s(j,:,1))=A(ind4s(j,:,2),ind4s(j,:,1))-(4*N^2/h)*(h/2)*M;
-    A(ind4s(j,:,1),ind4s(j,:,2))=A(ind4s(j,:,1),ind4s(j,:,2))-(4*N^2/h)*(h/2)*M;
-    A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))+(4*N^2/h)*(h/2)*M;
+    A(ind4s(j,:,1),ind4s(j,:,1))=A(ind4s(j,:,1),ind4s(j,:,1))+(sigma/h)*(h/2)*M;
+    A(ind4s(j,:,2),ind4s(j,:,1))=A(ind4s(j,:,2),ind4s(j,:,1))-(sigma/h)*(h/2)*M;
+    A(ind4s(j,:,1),ind4s(j,:,2))=A(ind4s(j,:,1),ind4s(j,:,2))-(sigma/h)*(h/2)*M;
+    A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))+(sigma/h)*(h/2)*M;
     end
 end

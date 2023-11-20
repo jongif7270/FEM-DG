@@ -30,11 +30,11 @@ for j=1:tmp(1)
 end
 
 for j=tmp(1)+1:tmp(2)
-    ind4s(j,:,1)=ind4s(j,:,1)+(b+(e4s(j,1)-1)*(N+1)*(N+2)/2);
+    ind4s(j,:,1)=ind4s(j,:,1)+fliplr(b+(e4s(j,1)-1)*(N+1)*(N+2)/2);
     if e4s(j,2)==0
         ind4s(j,:,2)=ind4s(j,:,1);
     else
-        ind4s(j,:,2)=ind4s(j,:,2)+fliplr(b+(e4s(j,2)-1)*(N+1)*(N+2)/2);
+        ind4s(j,:,2)=ind4s(j,:,2)+(b+(e4s(j,2)-1)*(N+1)*(N+2)/2);
     end
 end
 
@@ -43,6 +43,6 @@ for j=tmp(2)+1:size(e4s,1)
     if e4s(j,2)==0
         ind4s(j,:,2)=ind4s(j,:,1);
     else
-        ind4s(j,:,2)=ind4s(j,:,2)+fliplr(((1:N+1)+(e4s(j,1)-1)*(N+1)*(N+2)/2));
+        ind4s(j,:,2)=ind4s(j,:,2)+fliplr(((1:N+1)+(e4s(j,2)-1)*(N+1)*(N+2)/2));
     end
 end

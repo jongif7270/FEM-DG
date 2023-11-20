@@ -1,7 +1,7 @@
 function DG_plot(i,j)
 M=2.^(1:i);
 N=2.^(0:j);
-t = tiledlayout(i,j+1);
+tiledlayout(i,j+1);
 for k=1:i
     for l=1:j+1
         nexttile
