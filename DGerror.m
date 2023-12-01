@@ -2,6 +2,7 @@ function [time,error]=DGerror(xl,xr,yl,yr,t,N)
 
 %%%%
 %f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
+%u=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 ux=@(x) pi*cos(pi*x(:,1)).*sin(pi*x(:,2));
 uy=@(x) pi*sin(pi*x(:,1)).*cos(pi*x(:,2));
 %%%%
