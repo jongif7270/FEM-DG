@@ -1,4 +1,4 @@
-function [A,V2D,Dr,Ds,u,c4n2] = DG2(xl,xr,yl,yr,Mx,My,N)
+function [A,V2D,Dr,Ds,u,c4n2] = DG3(xl,xr,yl,yr,Mx,My,N)
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
@@ -87,4 +87,13 @@ end
 %fns = setdiff(1:size(ind4e(:),1), inddb);
 fns = 1:size(ind4e(:),1);
 u(fns) = A(fns,fns)\b(fns);
+%plot3(c4n2(:,1),c4n2(:,2),u,'.')
+
+% 중복된 좌표를 찾고, 각 중복된 좌표에 대한 u 값의 평균 계산
+[~, ~, ic] = unique(c4n2, 'rows', 'stable');
+updated_u = accumarray(ic, u, [], @mean);
+
+% 각 중복된 좌표에 대한 u 값을 업데이트
+u = updated_u(ic);
+
 plot3(c4n2(:,1),c4n2(:,2),u,'.')

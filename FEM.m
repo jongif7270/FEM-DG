@@ -1,4 +1,4 @@
-function [A] = FEM(xl,xr,yl,yr,Mx,My,N)
+function [A,u,Dr,Ds,V] = FEM(xl,xr,yl,yr,Mx,My,N)
 [c4n,n4e,ind4e,inddb] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [x,y]=Nodes2D_equi(N);
 [r,s]=xytors(x,y);
@@ -40,4 +40,4 @@ A=sparse(Ir(:),Jr(:),Kr(:));
 fns = setdiff(1:size(c4n,1), inddb);
 u(inddb) = u_D(c4n(inddb,:));
 u(fns) = A(fns,fns)\b(fns);
-plot3(c4n(:,1),c4n(:,2),u)
+plot3(c4n(:,1),c4n(:,2),u,'.')
