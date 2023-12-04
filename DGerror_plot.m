@@ -1,7 +1,7 @@
-function DGerror_plot(xl,xr,yl,yr,t,N)
-K=2.^(0:N);
-tiledlayout(N+1,1);
-for j=1:N+1
+function DGerror_plot(xl,xr,yl,yr,M,N)
+K=2.^(1:M);
+tiledlayout(M,1);
+for j=1:M
     nexttile
-    DGerror(xl,xr,yl,yr,t,K(j));
+    DGerror2(xl,xr,yl,yr,K(j),N);
 end
