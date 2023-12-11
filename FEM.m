@@ -20,11 +20,11 @@ rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 Kr=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2,size(n4e,1));
 
 for j=1:size(n4e,1)
-M=J(j)*I/(V*V');
-Srr=J(j)*(V\Dr)'*(V\Dr);
-Srs=J(j)*(V\Dr)'*(V\Ds);
-Ssr=J(j)*(V\Ds)'*(V\Dr);
-Sss=J(j)*(V\Ds)'*(V\Ds);
+M=I/(V*V');
+Srr=(V\Dr)'*(V\Dr);
+Srs=(V\Dr)'*(V\Ds);
+Ssr=(V\Ds)'*(V\Dr);
+Sss=(V\Ds)'*(V\Ds);
 
 K=J(j)*((rx(j)^2+ry(j)^2)*Srr+(rx(j)*sx(j)+ry(j)*sy(j))*(Srs+Ssr)+(sx(j)^2+sy(j)^2)*Sss);
 Kr(:,:,j)=K;
