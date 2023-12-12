@@ -1,6 +1,9 @@
-function [A,V2D,Dr,Ds,u,c4n2] = DG2(xl,xr,yl,yr,Mx,My,N)
+function [A,V2D,Dr,Ds,u,c4n2] = DG2(M,N)
+
+xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
+
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
-[ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
+[ind4e,~,inddb,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 b = zeros(size(ind4e(:),1),1);
 u = b;
@@ -10,7 +13,6 @@ u_D=@(x) x(:,1)*0;
 [r1D] = Nodes1D_equi(N);
 [V1D] = Vandermonde1D(N,r1D);
 I1D = eye(size(V1D,1));
-I2D = eye((N+1)*(N+2)/2);
 
 ind4s=edge(n4e,N);
 e4s = computeE4s(n4e);
@@ -20,6 +22,7 @@ n4s = computeN4s(n4e);
 [r,s]=xytors(x,y);
 V2D=Vandermonde2D(N,r,s);
 [Dr,Ds]=Dmatrices2D(N,r,s,V2D);
+I2D = eye((N+1)*(N+2)/2);
 
 xr = (c4n(n4e(:,1),1)-c4n(n4e(:,3),1))/2;
 yr = (c4n(n4e(:,1),2)-c4n(n4e(:,3),2))/2;
@@ -84,7 +87,7 @@ for j=1:size(e4s,1)
 end
 
 %spy(A)
-%fns = setdiff(1:size(ind4e(:),1), inddb);
-fns = 1:size(ind4e(:),1);
+fns = setdiff(1:size(ind4e(:),1), inddb);
+%fns = 1:size(ind4e(:),1);
 u(fns) = A(fns,fns)\b(fns);
 plot3(c4n2(:,1),c4n2(:,2),u,'.')
