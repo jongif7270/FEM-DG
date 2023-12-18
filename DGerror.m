@@ -19,4 +19,4 @@ for i =1:iter
     [~,V,Dr,Ds,u,~] = DG2(Ma(i),N);
     error(i)=computeDGerror(c4n,c4n2,n4e,ind4e,Dr,Ds,u,ux,uy,V,N);
 end
-plot(time,error)
+loglog(time,error)
