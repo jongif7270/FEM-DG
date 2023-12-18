@@ -6,9 +6,7 @@ xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 b = zeros(size(ind4e(:),1),1);
-u = b;
 f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
-u_D=@(x) x(:,1)*0;
 
 [r1D] = Nodes1D_equi(N);
 [V1D] = Vandermonde1D(N,r1D);
