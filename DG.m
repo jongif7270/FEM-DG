@@ -42,11 +42,11 @@ Ir=repmat(ind4e,1,(N+1)*(N+2)/2)';
 Jr=(repmat(ind(:),1,(N+1)*(N+2)/2))';
 A=sparse(Ir(:),Jr(:),Kr(:));
 
-A=A+B;
+%A=A+B;
 
-%spy(A)
+spy(A)
 %fns = setdiff(1:size(ind4e(:),1), inddb);
 fns = 1:size(ind4e(:),1);
 u(inddb) = u_D(c4n2(inddb,:));
 u(fns) = A(fns,fns)\b(fns);
-plot3(c4n2(:,1),c4n2(:,2),u,'.')
+%plot3(c4n2(:,1),c4n2(:,2),u,'.')
