@@ -3,10 +3,11 @@ function u = HDG2(M,N)
 xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
-[ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
+[ind4e,~,inddb,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 b = zeros(size(ind4e(:),1),1);
 f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
+u_D=@(x) x(:,1)*0;
 
 [r1D] = Nodes1D_equi(N);
 [V1D] = Vandermonde1D(N,r1D);
@@ -16,6 +17,13 @@ ind4s=edge(n4e,N);
 e4s = computeE4s(n4e);
 n4s = computeN4s(n4e);
 s4e = computeS4e(n4e);
+
+inddb2=[];
+for i=1:size(e4s,1)
+    if e4s(i,2)==0
+    inddb2=[inddb2 (i-1)*(N+1)+(1:N+1)];
+    end
+end
 
 [x,y]=Nodes2D_equi(N);
 [r,s]=xytors(x,y);
@@ -57,7 +65,7 @@ C=B';
 D=zeros(size(e4s,1)*(N+1),size(e4s,1)*(N+1));
 
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
-k=1;
+k=4*N^2;
 
 M=I1D/(V1D*V1D');
 
@@ -98,11 +106,17 @@ end
 E=[A B; C D];
 
 spy(E);
+fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
+V(inddb2) = zeros(length(inddb2),1);
+F=C*(A\B)-D;
+G=C*(A\b);
+V(fns)=F(fns,fns)\G(fns);
 
-V=(C*(A\B)-D)\(C*(A\b));
-u=A\(b-(B*V));
+u=A\(b-(B*V'));
+
+%u(inddb) = u_D(c4n2(inddb,:));
 
 %Iu=eye(Mx*My*(N+1)*(N+2));
 %u=(Iu-A\B/D*C)\A\b;
 
-%plot3(c4n2(:,1),c4n2(:,2),u,'.')
+plot3(c4n2(:,1),c4n2(:,2),u,'.')
