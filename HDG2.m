@@ -1,9 +1,9 @@
-function u = HDG2(M,N)
+function [E,V2D,Dr,Ds,u,c4n2] = HDG2(M,N)
 
 xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
-[ind4e,~,inddb,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
+[ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 b = zeros(size(ind4e(:),1),1);
 f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
