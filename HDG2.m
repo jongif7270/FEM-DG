@@ -62,7 +62,9 @@ B=zeros(Mx*My*(N+1)*(N+2),size(e4s,1)*(N+1));
 
 C=B';
 
-D=zeros(size(e4s,1)*(N+1),size(e4s,1)*(N+1));
+Da=zeros(3*(N+1),3*(N+1),size(n4e,1));
+
+T=[(s4e(:,1)-1)*(N+1)+(1:N+1) (s4e(:,2)-1)*(N+1)+(1:N+1) (s4e(:,3)-1)*(N+1)+(1:N+1)];
 
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
 k=4*N^2;
@@ -70,15 +72,14 @@ k=4*N^2;
 M=I1D/(V1D*V1D');
 
 for j=1:size(n4e,1)
-    ht=norm(c4n2(ind4s(s4e(j,1),N+1,1),:)-c4n2(ind4s(s4e(j,1),1,1),:));
+    ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
     for i=1:size(n4e,2)
-        n=normal(c4n2(ind4s(s4e(j,i),N+1,1),:)-c4n2(ind4s(s4e(j,i),1,1),:));
-        h=norm(c4n2(ind4s(s4e(j,i),N+1,1),:)-c4n2(ind4s(s4e(j,i),1,1),:));
+        n=normal(c4n(n4e(j,mod(i,3)+1),:)-c4n(n4e(j,mod(i-1,3)+1),:));
+        h=norm(c4n(n4e(j,mod(i,3)+1),:)-c4n(n4e(j,mod(i-1,3)+1),:));
 
-        D((s4e(j,i)-1)*(N+1)+(1:N+1),(s4e(j,i)-1)*(N+1)+(1:N+1))=D((s4e(j,i)-1)*(N+1)+(1:N+1),(s4e(j,i)-1)*(N+1)+(1:N+1))+(h/2)*(k/ht)*M;
+        Da((i-1)*(N+1)+(1:N+1),(i-1)*(N+1)+(1:N+1),j)=(h/2)*(k/ht)*M;
         
         if e4s(s4e(j,i),2)==j
-            n=-n;
             A(ind4e(j,:),fliplr(ind4s(s4e(j,i),:,2)))=A(ind4e(j,:),fliplr(ind4s(s4e(j,i),:,2)))-(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
             A(fliplr(ind4s(s4e(j,i),:,2)),ind4e(j,:))=A(fliplr(ind4s(s4e(j,i),:,2)),ind4e(j,:))-(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
             A(fliplr(ind4s(s4e(j,i),:,2)),fliplr(ind4s(s4e(j,i),:,2)))=A(fliplr(ind4s(s4e(j,i),:,2)),fliplr(ind4s(s4e(j,i),:,2)))+(h/2)*(k/ht)*M;
@@ -102,6 +103,10 @@ for j=1:size(n4e,1)
     end
 end
 
+TA=T';
+Id=repmat(T,1,3*(N+1))';
+Jd=(repmat(TA(:),1,3*(N+1)))';
+D=sparse(Id(:),Jd(:),Da(:));
 
 E=[A B; C D];
 
