@@ -16,7 +16,8 @@ Ma=2.^(1:iter);
 for i =1:iter
     [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Ma(i),Ma(i),N);
     [ind4e,~,c4n2] = indexforDG2(xl,xr,yl,yr,Ma(i),Ma(i),N);
-    [~,V,Dr,Ds,u,~] = HDG2(Ma(i),N);
+    [u,V,Dr,Ds,~] = HDG3(Ma(i),N);
     error(i)=computeDGerror(c4n,c4n2,n4e,ind4e,Dr,Ds,u,ux,uy,V,N);
 end
+%plot(time,error)
 loglog(time,error)

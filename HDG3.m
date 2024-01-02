@@ -1,4 +1,4 @@
-function [E,V2D,Dr,Ds,u,c4n2] = HDG3(M,N)
+function [u,V2D,Dr,Ds,c4n2] = HDG3(M,N)
 
 xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 
@@ -52,6 +52,8 @@ Cr=zeros(3*(N+1),(N+1)*(N+2)/2,size(n4e,1));
 
 Da=zeros(3*(N+1),3*(N+1),size(n4e,1));
 
+Fr=zeros(3*(N+1),3*(N+1),size(n4e,1));
+
 T=[(s4e(:,1)-1)*(N+1)+(1:N+1) (s4e(:,2)-1)*(N+1)+(1:N+1) (s4e(:,3)-1)*(N+1)+(1:N+1)];
 
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
@@ -60,8 +62,8 @@ k=4*N^2;
 M=I1D/(V1D*V1D');
 M2D=I2D/(V2D*V2D');
 
-
-%% 중복되는 노드가 발생, sparse 돌리기 전에 겹쳐서 사라져버림. 해결 필요. line별로 계산후 sparse 적용 고려.
+fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
+V(inddb2) = zeros(length(inddb2),1);
 
 for j=1:size(n4e,1)
     Aa(:,:,j)=J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds);
@@ -94,6 +96,8 @@ for j=1:size(n4e,1)
     Ar(:,:,j)=Aa(:,:,j)+Ab(:,:,j)+Ac(:,:,j)+Ad(:,:,j);
     Br(:,:,j)=Ba(:,:,j)+Bb(:,:,j);
     Cr(:,:,j)=Ca(:,:,j)+Cb(:,:,j);
+
+    Fr(:,:,j)=Cr(:,:,j)*(Ar(:,:,j)\Br(:,:,j))-Da(:,:,j);
 end
 
 ind=ind4e';
@@ -107,20 +111,19 @@ Ib=repmat(ind4e,1,3*(N+1))';
 Jb=(repmat(TA(:),1,(N+1)*(N+2)/2))';
 B=sparse(Ib(:),Jb(:),Br(:));
 
-Ic=(repmat(TA(:),1,(N+1)*(N+2)/2))';
-Jc=repmat(ind4e,1,3*(N+1))';
+Ic=(repmat(T,1,(N+1)*(N+2)/2))';
+Jc=repmat(ind(:),1,3*(N+1))';
 C=sparse(Ic(:),Jc(:),Cr(:));
 
 Id=repmat(T,1,3*(N+1))';
 Jd=(repmat(TA(:),1,3*(N+1)))';
 D=sparse(Id(:),Jd(:),Da(:));
 
-E=[A B; C D];
+If=repmat(T,1,3*(N+1))';
+Jf=(repmat(TA(:),1,3*(N+1)))';
+F=sparse(If(:),Jf(:),Fr(:));
 
-spy(E);
-fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
-V(inddb2) = zeros(length(inddb2),1);
-F=C*(A\B)-D;
+%F=C*(A\B)-D;
 G=C*(A\b);
 V(fns)=F(fns,fns)\G(fns);
 
