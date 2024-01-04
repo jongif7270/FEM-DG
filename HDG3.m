@@ -16,10 +16,13 @@ ind4s=edge(n4e,N);
 e4s = computeE4s(n4e);
 s4e = computeS4e(n4e);
 
-inddb2=[];
+count=sum(e4s(:, 2) == 0);
+inddb2=zeros(1,count*(N+1));
+tmp=0;
 for i=1:size(e4s,1)
     if e4s(i,2)==0
-    inddb2=[inddb2 (i-1)*(N+1)+(1:N+1)];
+        tmp=tmp+1;
+        inddb2((tmp-1)*(N+1)+(1:N+1))=(i-1)*(N+1)+(1:N+1);
     end
 end
 
@@ -54,6 +57,10 @@ Da=zeros(3*(N+1),3*(N+1),size(n4e,1));
 
 Fr=zeros(3*(N+1),3*(N+1),size(n4e,1));
 
+Gr=zeros(3*(N+1),1,size(n4e,1));
+
+Vr=zeros(3*(N+1),1,size(n4e,1));
+
 T=[(s4e(:,1)-1)*(N+1)+(1:N+1) (s4e(:,2)-1)*(N+1)+(1:N+1) (s4e(:,3)-1)*(N+1)+(1:N+1)];
 
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
@@ -67,7 +74,7 @@ V(inddb2) = zeros(length(inddb2),1);
 
 for j=1:size(n4e,1)
     Aa(:,:,j)=J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds);
-    b(ind4e(j,:)) = b(ind4e(j,:)) + J(j)*M2D*f(c4n2(ind4e(j,:),:));
+    ba=J(j)*M2D*f(c4n2(ind4e(j,:),:));
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
     for i=1:size(n4e,2)
         n=normal(c4n(n4e(j,mod(i,3)+1),:)-c4n(n4e(j,mod(i-1,3)+1),:));
@@ -97,7 +104,10 @@ for j=1:size(n4e,1)
     Br(:,:,j)=Ba(:,:,j)+Bb(:,:,j);
     Cr(:,:,j)=Ca(:,:,j)+Cb(:,:,j);
 
-    Fr(:,:,j)=Cr(:,:,j)*(Ar(:,:,j)\Br(:,:,j))-Da(:,:,j);
+    Fr(:,:,j)=-Cr(:,:,j)*(Ar(:,:,j)\Br(:,:,j))+Da(:,:,j);
+    Gr(:,1,j)=-Cr(:,:,j)*(Ar(:,:,j)\ba);
+
+    b(ind4e(j,:))=b(ind4e(j,:))+ba;
 end
 
 ind=ind4e';
@@ -115,16 +125,20 @@ Ic=(repmat(T,1,(N+1)*(N+2)/2))';
 Jc=repmat(ind(:),1,3*(N+1))';
 C=sparse(Ic(:),Jc(:),Cr(:));
 
-Id=repmat(T,1,3*(N+1))';
-Jd=(repmat(TA(:),1,3*(N+1)))';
-D=sparse(Id(:),Jd(:),Da(:));
+%Id=repmat(T,1,3*(N+1))';
+%Jd=(repmat(TA(:),1,3*(N+1)))';
+%D=sparse(Id(:),Jd(:),Da(:));
 
 If=repmat(T,1,3*(N+1))';
 Jf=(repmat(TA(:),1,3*(N+1)))';
 F=sparse(If(:),Jf(:),Fr(:));
 
+Ig=TA;
+Jg=ones(3*(N+1),size(s4e,1));
+G=sparse(Ig(:),Jg(:),Gr(:));
+
 %F=C*(A\B)-D;
-G=C*(A\b);
+%G=-C*(A\b);
 V(fns)=F(fns,fns)\G(fns);
 
 u=A\(b-(B*V'));
