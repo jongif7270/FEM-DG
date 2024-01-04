@@ -121,9 +121,9 @@ Ib=repmat(ind4e,1,3*(N+1))';
 Jb=(repmat(TA(:),1,(N+1)*(N+2)/2))';
 B=sparse(Ib(:),Jb(:),Br(:));
 
-Ic=(repmat(T,1,(N+1)*(N+2)/2))';
-Jc=repmat(ind(:),1,3*(N+1))';
-C=sparse(Ic(:),Jc(:),Cr(:));
+%Ic=(repmat(T,1,(N+1)*(N+2)/2))';
+%Jc=repmat(ind(:),1,3*(N+1))';
+%C=sparse(Ic(:),Jc(:),Cr(:));
 
 %Id=repmat(T,1,3*(N+1))';
 %Jd=(repmat(TA(:),1,3*(N+1)))';
