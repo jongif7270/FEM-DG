@@ -1,10 +1,10 @@
 function [u,V2D,Dr,Ds,c4n2] = HDG4(M,N)
 
 %% 
-xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;    a=[0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
+%xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;    a=[0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 %% Ex 3.3
-%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0;S=1;k=4*N^2;  f=@(x) sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4)); %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0;S=1;k=4*N^2;  f=@(x) sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4)); %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
 
 %% Ex 3.4
 %xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))];b=0;e=1;S=-1;k=1;
@@ -93,7 +93,7 @@ for j=1:size(n4e,1)
     Aa(:,:,j)=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
               -J(j)*(a(1)*(rx(j)*Dr'+sx(j)*Ds')*M2D+a(2)*(ry(j)*Dr'+sy(j)*Ds')*M2D);
-    ba=J(j)*M2D*f(c4n2(ind4e(j,:),:));
+    da=J(j)*M2D*f(c4n2(ind4e(j,:),:));
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
     for i=1:size(n4e,2)
         n=normal(c4n(n4e(j,mod(i,3)+1),:)-c4n(n4e(j,mod(i-1,3)+1),:));
@@ -146,7 +146,9 @@ for j=1:size(n4e,1)
     Cr(:,:,j)=Ca(:,:,j)+Cb(:,:,j);
 
     Fr(:,:,j)=Cr(:,:,j)*(Ar(:,:,j)\Br(:,:,j))-Da(:,:,j);
-    Gr(:,1,j)=Cr(:,:,j)*(Ar(:,:,j)\ba);
+    Gr(:,1,j)=Cr(:,:,j)*(Ar(:,:,j)\da);
+
+    d(ind4e(j,:))=d(ind4e(j,:))+da;
 end
 
 ind=ind4e';
