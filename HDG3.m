@@ -6,6 +6,7 @@ xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
 
 b = zeros(size(ind4e(:),1),1);
+%u=b;
 f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 [r1D] = Nodes1D_equi(N);
@@ -39,17 +40,21 @@ ys = (c4n(n4e(:,2),2)-c4n(n4e(:,3),2))/2;
 J = xr.*ys-xs.*yr;
 rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 
-As=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2,size(n4e,1));
+%As=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2,size(n4e,1));
 
-Bs=zeros((N+1)*(N+2)/2,3*(N+1),size(n4e,1));
+%Bs=zeros((N+1)*(N+2)/2,3*(N+1),size(n4e,1));
 
-Cs=zeros(3*(N+1),(N+1)*(N+2)/2,size(n4e,1));
+%Cs=zeros(3*(N+1),(N+1)*(N+2)/2,size(n4e,1));
 
 Da=zeros(3*(N+1),3*(N+1));
 
 Fr=zeros(3*(N+1),3*(N+1),size(n4e,1));
 
 Gr=zeros(3*(N+1),size(n4e,1));
+
+AFr=zeros((N+1)*(N+2)/2,size(n4e,1));
+
+ABr=zeros((N+1)*(N+2)/2,3*(N+1),size(n4e,1));
 
 %Vr=zeros(3*(N+1),size(n4e,1));
 
@@ -63,6 +68,17 @@ M2D=I2D/(V2D*V2D');
 
 fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
 V(inddb2) = zeros(length(inddb2),1);
+
+Tfns=zeros(size(T));
+for j=1:size(T,1)
+for i=1:size(T,2)
+if ismember (T(j,i),fns)==1
+Tfns(j,i)=i;
+else
+Tfns(j,i)=0;
+end
+end
+end
 
 for j=1:size(n4e,1)
     Ab=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2);
@@ -103,9 +119,9 @@ for j=1:size(n4e,1)
         end
     end
 
-    As(:,:,j)=Aa+Ab+Ac+Ad;
-    Bs(:,:,j)=Ba+Bb;
-    Cs(:,:,j)=Ca+Cb;
+    %As(:,:,j)=Aa+Ab+Ac+Ad;
+    %Bs(:,:,j)=Ba+Bb;
+    %Cs(:,:,j)=Ca+Cb;
 
     Ar=Aa+Ab+Ac+Ad;
     Br=Ba+Bb;
@@ -114,7 +130,23 @@ for j=1:size(n4e,1)
     Fr(:,:,j)=-Cr*(Ar\Br)+Da;
     Gr(:,j)=-Cr*(Ar\ba);
 
-    %Vr(:,j)=Fr(:,:,j)\Gr(:,j);
+    AFr(:,j)=Ar\ba;
+    ABr(:,:,j)=Ar\Br;
+
+    %tmp1=[];
+    %tmp2=[];
+    %for i=1:size(T,2)
+    %    if Tfns(j,i)~=0
+    %        tmp1=[tmp1 i];
+    %    else
+    %        tmp2=[tmp2 i];
+    %    end
+    %end
+
+    %Vr(tmp1,j)=Fr(tmp1,tmp1,j)\Gr(tmp1,j);
+    %Vr(tmp2,j)=zeros(size(tmp2,1));
+
+    %u(ind4e(j,:))=u(ind4e(j,:))+Ar\(ba-(Br*Vr(:,j)));
 
     b(ind4e(j,:))=b(ind4e(j,:))+ba;
 end
@@ -122,13 +154,13 @@ end
 ind=ind4e';
 TA=T';
 
-Ia=repmat(ind4e,1,(N+1)*(N+2)/2)';
-Ja=(repmat(ind(:),1,(N+1)*(N+2)/2))';
-A=sparse(Ia(:),Ja(:),As(:));
+%Ia=repmat(ind4e,1,(N+1)*(N+2)/2)';
+%Ja=(repmat(ind(:),1,(N+1)*(N+2)/2))';
+%A=sparse(Ia(:),Ja(:),As(:));
 
-Ib=repmat(ind4e,1,3*(N+1))';
-Jb=(repmat(TA(:),1,(N+1)*(N+2)/2))';
-B=sparse(Ib(:),Jb(:),Bs(:));
+%Ib=repmat(ind4e,1,3*(N+1))';
+%Jb=(repmat(TA(:),1,(N+1)*(N+2)/2))';
+%B=sparse(Ib(:),Jb(:),Bs(:));
 
 %Ic=(repmat(T,1,(N+1)*(N+2)/2))';
 %Jc=repmat(ind(:),1,3*(N+1))';
@@ -146,11 +178,23 @@ Ig=TA;
 Jg=ones(3*(N+1),size(s4e,1));
 G=sparse(Ig(:),Jg(:),Gr(:));
 
+%Iv=TA;
+%Jv=ones(3*(N+1),size(s4e,1));
+%V=sparse(Iv(:),Jv(:),Vr(:));
+
 %F=C*(A\B)-D;
 %G=-C*(A\b);
 V(fns)=F(fns,fns)\G(fns);
 
-u=A\(b-(B*V'));
+Iaf=ind;
+Jaf=ones((N+1)*(N+2)/2,size(s4e,1));
+AF=sparse(Iaf(:),Jaf(:),AFr(:));
+
+Iab=repmat(ind4e,1,3*(N+1))';
+Jab=(repmat(TA(:),1,(N+1)*(N+2)/2))';
+AB=sparse(Iab(:),Jab(:),ABr(:));
+
+u=AF-AB*V';
 
 %u=zeros(size(ind4e(:),1),1);
 %for j=1:size(n4e,1)

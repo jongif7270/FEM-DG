@@ -4,14 +4,14 @@ function [u,V2D,Dr,Ds,c4n2] = HDG4(M,N)
 %xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;    a=[0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 %% Ex 3.3
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0;S=1;k=4*N^2;  f=@(x) sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4)); %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0;S=-1;k=1;  f=@(x) sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4; %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
 
 %% Ex 3.4
-%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))];b=0;e=1;S=-1;k=1;
+%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
-
+                
 d = zeros(size(ind4e(:),1),1);
 
 [r1D] = Nodes1D_equi(N);
@@ -76,10 +76,11 @@ en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
 M=I1D/(V1D*V1D');
 M2D=I2D/(V2D*V2D');
 
-fns = setdiff(1:size(e4s,1)*(N+1), inddb3);
+fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
 %fns = 1:size(e4s,1)*(N+1);
-V(inddb3) = zeros(length(inddb3),1)+1;
-%V(inddb4) = zeros(length(inddb4),1);
+%V(inddb2) = zeros(length(inddb2),1);
+V(inddb3) = ones(length(inddb3),1);
+V(inddb4) = zeros(length(inddb4),1);
 
 for j=1:size(n4e,1)
     Ab=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2);
