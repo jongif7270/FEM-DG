@@ -95,10 +95,10 @@ M=I1D/(V1D*V1D');
 M2D=I2D/(V2D*V2D');
 
 
-fns = setdiff(1:size(e4s,1)*(N+1), inddb3);
+fns = setdiff(1:size(e4s,1)*(N+1), inddb2);
 %fns = 1:size(e4s,1)*(N+1);
 %V(inddb2) = zeros(length(inddb2),1);
-V(inddb3) = ones(length(inddb3),1);
+%V(inddb3) = zeros(length(inddb3),1);
 %V(inddb4) = zeros(length(inddb4),1);
 
 for j=1:size(n4e,1)
@@ -176,6 +176,8 @@ for j=1:size(n4e,1)
     d(ind4e(j,:))=d(ind4e(j,:))+da;
 end
 
+
+
 ind=ind4e';
 TA=T';
 
@@ -188,6 +190,7 @@ Jg=ones(3*(N+1),size(s4e,1));
 G=sparse(Ig(:),Jg(:),Gr(:));
 
 V(fns)=F(fns,fns)\G(fns);
+V(inddb2)=F(inddb2,inddb2)\G(inddb2);
 
 Iaf=ind;
 Jaf=ones((N+1)*(N+2)/2,size(s4e,1));

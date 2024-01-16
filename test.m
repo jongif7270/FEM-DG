@@ -78,3 +78,22 @@ end
 answer2=nonzeros(answer2)';
 answer3=nonzeros(answer3)';
 answer4=nonzeros(answer4)';
+
+
+a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))];
+
+ae=zeros((N+1)*(N+2)/2,2,size(n4e,1));
+for j=1:size(n4e,1)
+    for k=1:(N+1)*(N+2)/2
+        ae(k,:,j)=a(c4n2(((N+1)*(N+2)/2)*(j-1)+k,:));
+    end
+end
+
+al=zeros(N+1,2,size(e4s,1));
+for j=1:size(n4e,1)
+    for i=1:size(n4e,2)
+        for k=1:N+1
+            al(k,:,s4e(j,i))=a(c4n2(ind4s(s4e(j,i),k,1),:));
+        end
+    end
+end
