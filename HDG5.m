@@ -7,7 +7,7 @@ function [u,V2D,Dr,Ds,c4n2] = HDG5(M,N)
 %xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0.8,0.6];b=1;e=0;S=-1;k=1;  f=@(x) sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4; V_D=@(x) 1; %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
 
 %% Ex 3.4
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); V_D=@(x) 0;
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -exp(x(:,1)).*x(:,2).*sin(x(:,2)).*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); V_D=@(x) 0;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
