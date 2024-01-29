@@ -4,7 +4,7 @@ function [u,V2D,Dr,Ds,c4n2] = HDG4(M,N)
 %xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;    a=[0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 %% Ex 3.3
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0;S=-1;k=1;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +a(1).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +a(2).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); %u=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=[0.8,0.6];b=1;e=0.001;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +a(1).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +a(2).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)
 
 %% Ex 3.4
 %xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2));
@@ -60,8 +60,8 @@ for j=1:size(n4e,1)
 end
 
 inddb2=nonzeros(inddb2)';
-inddb3=nonzeros(inddb3)';
-inddb4=nonzeros(inddb4)';
+%inddb3=nonzeros(inddb3)';
+%inddb4=nonzeros(inddb4)';
 
 
 [x,y]=Nodes2D_equi(N);
@@ -89,7 +89,7 @@ ABr=zeros((N+1)*(N+2)/2,3*(N+1),size(n4e,1));
 
 V=zeros(size(e4s,1)*(N+1),1);
 
-g=zeros(size(e4s,1)*(N+1),1);
+%g=zeros(size(e4s,1)*(N+1),1);
 
 T=[(s4e(:,1)-1)*(N+1)+(1:N+1) (s4e(:,2)-1)*(N+1)+(1:N+1) (s4e(:,3)-1)*(N+1)+(1:N+1)];
 
@@ -112,8 +112,6 @@ for j=1:size(n4e,1)
 
     Ca=zeros(3*(N+1),(N+1)*(N+2)/2);
     Cb=zeros(3*(N+1),(N+1)*(N+2)/2);
-    
-    ga=zeros(3*(N+1),1);
 
     Aa=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
@@ -144,6 +142,10 @@ for j=1:size(n4e,1)
                 Ca((i-1)*(N+1)+(1:N+1),:)=e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
                 Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M-dot(a,n)*(h/2)*M;
             end
+            if e4s(s4e(j,i),2)==0
+                da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ue(c4n2(ind4s(s4e(j,i),:,1),:));
+                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M)*ue(c4n2(ind4s(s4e(j,i),:,1),:));
+            end
         else
             Da((i-1)*(N+1)+(1:N+1),(i-1)*(N+1)+(1:N+1))=e*(h/2)*(k/ht)*M-dot(a,n)*(h/2)*M;
     
@@ -166,9 +168,8 @@ for j=1:size(n4e,1)
             end
 
             if e4s(s4e(j,i),2)==0
-                da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ones((N+1),1);
-                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M+dot(a,n)*(h/2)*M)*ones((N+1),1);
-                ga((i-1)*(N+1)+(1:N+1))=ga((i-1)*(N+1)+(1:N+1))-(e*(h/2)*(k/ht)*M-dot(a,n)*(h/2)*M)*ones((N+1),1);
+                da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ue(c4n2(ind4s(s4e(j,i),:,1),:));
+                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M+dot(a,n)*(h/2)*M)*ue(c4n2(ind4s(s4e(j,i),:,1),:));
             end
         end
     end
@@ -183,7 +184,6 @@ for j=1:size(n4e,1)
     ABr(:,:,j)=Ar\Br;
 
     d(ind4e(j,:))=d(ind4e(j,:))+da;
-    g(T(j,:))=g(T(j,:))+ga;
 end
 
 
@@ -200,10 +200,6 @@ Jg=ones(3*(N+1),size(s4e,1));
 G=sparse(Ig(:),Jg(:),Gr(:));
 
 V(fns)=F(fns,fns)\G(fns);
-
-%V(fns)=F(fns,fns)\(G(fns)+g(fns));
-%V(inddb3)=V_D(c4n2(inddb3,:));
-%V(inddb2)=F(inddb2,inddb2)\(G(inddb2)+g(inddb2));
 
 Iaf=ind;
 Jaf=ones((N+1)*(N+2)/2,size(s4e,1));
