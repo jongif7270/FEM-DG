@@ -129,7 +129,7 @@ for j=1:size(n4e,1)
 
     Aa=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
-              -J(j)*((rx(j)*Dr'+sx(j)*Ds')*M2D*ae(:,1,j)+(ry(j)*Dr'+sy(j)*Ds')*M2D*ae(:,2,j));
+              -J(j)*((rx(j)*Dr'+sx(j)*Ds')*M2D.*ae(:,1,j)'+(ry(j)*Dr'+sy(j)*Ds')*M2D.*ae(:,2,j))';
     da=J(j)*M2D*f(c4n2(ind4e(j,:),:));
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
     for i=1:size(n4e,2)
