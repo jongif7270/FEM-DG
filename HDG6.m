@@ -1,13 +1,13 @@
 function [u,V2D,Dr,Ds,c4n2] = HDG6(M,N)
 
 %% 
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +0*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -0*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +0*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -0*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 %% Ex 3.3
 %xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0.8,0.6];b=1;e=0.01;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +0.8*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +0.6*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
 
 %% Ex 3.4
-%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1))*(x(:,2)*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1))*x(:,2)*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -exp(x(:,1)).*x(:,2).*sin(x(:,2)).*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))),-exp(x(:,1)).*x(:,2).*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b.*sin(pi.*x(:,1)).*sin(pi.*x(:,2)) +exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -exp(x(:,1)).*x(:,2).*sin(x(:,2)).*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e.*2.*pi^2.*sin(pi.*x(:,1)).*sin(pi.*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG(xl,xr,yl,yr,Mx,My,N);
@@ -172,7 +172,7 @@ for j=1:size(n4e,1)
 
             if e4s(s4e(j,i),2)==0
                 da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ue(c4n2(ind4s(s4e(j,i),:,1),:));
-                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))+(e*(h/2)*(k/ht)*M+(h/2)*M.*v')*ue(c4n2(ind4s(s4e(j,i),:,1),:));
+                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M+(h/2)*M.*v')*ue(c4n2(ind4s(s4e(j,i),:,1),:));
             end
         end
     end
