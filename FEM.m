@@ -1,4 +1,5 @@
-function [A,u,Dr,Ds,V] = FEM(xl,xr,yl,yr,Mx,My,N)
+function [A,u,Dr,Ds,V] = FEM(M,N)
+xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;
 [c4n,n4e,ind4e,inddb] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,N);
 [x,y]=Nodes2D_equi(N);
 [r,s]=xytors(x,y);
