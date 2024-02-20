@@ -1,12 +1,10 @@
-%https://www.youtube.com/watch?v=vPzBavmnaeQ
-
 f = @(x) sin(2*x)+cos(x);
-
-int_t=0:0.5:2*pi;
-int_y=f(int_t);
 
 t=0:0.1:2*pi;
 y=f(t);
+
+int_t=0:0.5:2*pi;
+int_y=f(int_t);
 
 num_int=length(int_t);
 
@@ -35,3 +33,5 @@ hold on
 plot(int_t,int_y,'o')
 hold on
 plot(int_t,int_z)
+hold on
+plot(t,z)
