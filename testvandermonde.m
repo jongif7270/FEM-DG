@@ -1,9 +1,9 @@
 f = @(x) sin(2*x)+cos(x);
 
-t=0:0.1:2*pi;
+t=-1:0.1:1;
 y=f(t);
 
-int_t=0:0.5:2*pi;
+int_t=-1:0.5:1;
 int_y=f(int_t);
 
 num_int=length(int_t);
@@ -32,6 +32,6 @@ plot(t,y)
 hold on
 plot(int_t,int_y,'o')
 hold on
-plot(int_t,int_z)
+%plot(int_t,int_z)
 hold on
-plot(t,z)
+plot(t,z,'x')

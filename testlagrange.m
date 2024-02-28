@@ -32,3 +32,5 @@ legend('주어진 함수 위의 점', '원본 함수', '1차원 Lagrange 보간'
 xlabel('x');
 ylabel('y');
 title('1차원 Lagrange 보간');
+hold off
+plot(x_interp, lagrange_interp, 'x')
