@@ -10,7 +10,8 @@ for j=1:2*Mx*My %number of element
     n4e(j,:)=n4e(j,:)+[ind4e(j,1) ind4e(j,k+1) ind4e(j,(k+1)*(k+2)/2)];
 end
 
-[x,y] = Nodes2D_equi(k);
+%[x,y] = Nodes2D_equi(k);
+[x,y] = Nodes2D(k);
 [r,s] = xytors(x,y);
 [oldc4n,oldn4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,k);
 for j=1:2*Mx*My
