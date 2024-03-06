@@ -15,18 +15,18 @@ n4e = ind4e(:,[k+1 (k+1)*(k+2)/2 1]);
 inddb = [1:(k*Mx+1), 2*(k*Mx+1):(k*Mx+1):(k*Mx+1)*(k*My+1), ...
 ((k*Mx+1)*(k*My+1)-1):-1:(k*My*(k*Mx+1)+1), ...
 ((k*My-1)*(k*Mx+1)+1):-(k*Mx+1):(k*Mx+2)];
-%x=linspace(xl,xr,k*Mx+1);
-%y=linspace(yl,yr,k*My+1);
+x=linspace(xl,xr,k*Mx+1);
+y=linspace(yl,yr,k*My+1);
 %%
-[r] = JacobiGL(0,0,k);
-hx=(xr-xl)/Mx;
-hy=(yr-yl)/My;
-x=zeros(1,k*Mx+1);
-y=zeros(1,k*My+1);
-for j=0:(Mx-1)
-    x(j*k+1:j*k+k+1)=xl+j*hx+hx*(r+1)/2;
-    y(j*k+1:j*k+k+1)=yl+j*hy+hy*(r+1)/2;
-end
+%[r] = JacobiGL(0,0,k);
+%hx=(xr-xl)/Mx;
+%hy=(yr-yl)/My;
+%x=zeros(1,k*Mx+1);
+%y=zeros(1,k*My+1);
+%for j=0:(Mx-1)
+%    x(j*k+1:j*k+k+1)=xl+j*hx+hx*(r+1)/2;
+%    y(j*k+1:j*k+k+1)=yl+j*hy+hy*(r+1)/2;
+%end
 %%
 y=repmat(y,k*Mx+1,1);
 x=repmat(x,k*My+1,1)';
