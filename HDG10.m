@@ -1,6 +1,6 @@
 function [u,V2D,Dr,Ds,c4n2] = HDG10(M,N)
 
-%xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0,0];b=0;e=1;S=1;k=4*N^2;  f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +0*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) -0*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+% xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0.8,0.6];b=0;e=1;S=1;k=4*N^2;  f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +0.8*pi.*cos(pi.*x(:,1)).*sin(pi.*x(:,2)) +0.6*pi.*cos(pi.*x(:,2)).*sin(pi.*x(:,1)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 %% Ex 3.3
 %xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0.8,0.6];b=1;e=0.01;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +0.8*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +0.6*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
@@ -110,7 +110,7 @@ for j=1:size(n4e,1)
 
     Aa=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
-              -J(j)*((rx(j)*Dr'+sx(j)*Ds')*A2D*iM2D.*ae(:,1,j)'*A2D'+(ry(j)*Dr'+sy(j)*Ds')*A2D*iM2D.*ae(:,2,j)'*A2D');
+              -J(j)*((rx(j)*Dr'+sx(j)*Ds')*A2D*(iM2D.*ae(:,1,j))*A2D'+(ry(j)*Dr'+sy(j)*Ds')*A2D*(iM2D.*ae(:,2,j))*A2D');
     da=J(j)*M2D*f(c4n2(ind4e(j,:),:));
 
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
