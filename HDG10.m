@@ -8,7 +8,7 @@ function [u,V2D,Dr,Ds,c4n2] = HDG10(M,N)
 %% Ex 3.4
 xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))), -exp(x(:,1)).*x(:,2).*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +pi*exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*cos(pi*x(:,1)).*sin(pi*x(:,2)) +pi*(-exp(x(:,1)).*x(:,2).*sin(x(:,2))).*sin(pi*x(:,1)).*cos(pi*x(:,2)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-int=1+10/N;
+int=2;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle2(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG2(xl,xr,yl,yr,Mx,My,N);
@@ -32,6 +32,7 @@ V2D=Vandermonde2D(N,r,s);
 int_V2D=Vandermonde2D(N,int_r,int_s);
 iV2D=Vandermonde2D(int*N,int_r,int_s);
 [Dr,Ds]=Dmatrices2D(N,r,s,V2D);
+[iDr,iDs]=Dmatrices2D(int*N,int_r,int_s,iV2D);
 I2D = eye((N+1)*(N+2)/2);
 iI2D = eye((int*N+1)*(int*N+2)/2);
 
@@ -110,7 +111,7 @@ for j=1:size(n4e,1)
 
     Aa=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
-              -J(j)*((rx(j)*Dr'+sx(j)*Ds')*A2D*(iM2D.*ae(:,1,j))*A2D'+(ry(j)*Dr'+sy(j)*Ds')*A2D*(iM2D.*ae(:,2,j))*A2D');
+              -J(j)*A2D*((rx(j)*iDr'+sx(j)*iDs')*(iM2D.*ae(:,1,j))+(ry(j)*iDr'+sy(j)*iDs')*(iM2D.*ae(:,2,j)))*A2D';
     da=J(j)*M2D*f(c4n2(ind4e(j,:),:));
 
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
@@ -134,27 +135,27 @@ for j=1:size(n4e,1)
     
             Ab(:,en(s4e(j,i),:,1))=Ab(:,en(s4e(j,i),:,1))-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
             Ac(en(s4e(j,i),:,1),:)=Ac(en(s4e(j,i),:,1),:)-e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
-            Ad(en(s4e(j,i),:,1),en(s4e(j,i),:,1))=Ad(en(s4e(j,i),:,1),en(s4e(j,i),:,1))+e*(h/2)*(k/ht)*M+(h/2)*A1D*iM.*v'*A1D';
+            Ad(en(s4e(j,i),:,1),en(s4e(j,i),:,1))=Ad(en(s4e(j,i),:,1),en(s4e(j,i),:,1))+e*(h/2)*(k/ht)*M+(h/2)*A1D*(iM.*v)*A1D';
     
             if e4s(s4e(j,i),2)==j
                 Ba(:,(i-1)*(N+1)+(N+1:-1:1))=S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
                 Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))-e*(h/2)*(k/ht)*M;
     
                 Ca((i-1)*(N+1)+(N+1:-1:1),:)=e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
-                Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M-(h/2)*A1D*iM.*v'*A1D';
+                Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M-(h/2)*A1D*(iM.*v)*A1D';
             else
                 Ba(:,(i-1)*(N+1)+(1:N+1))=S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
                 Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))-e*(h/2)*(k/ht)*M;
     
                 Ca((i-1)*(N+1)+(1:N+1),:)=e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
-                Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M-(h/2)*A1D*iM.*v'*A1D';
+                Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M-(h/2)*A1D*(iM.*v)*A1D';
             end
             if e4s(s4e(j,i),2)==0
                 da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ue(c4n2(ind4s(s4e(j,i),:,1),:));
                 da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M)*ue(c4n2(ind4s(s4e(j,i),:,1),:));
             end
         else
-            Da((i-1)*(N+1)+(1:N+1),(i-1)*(N+1)+(1:N+1))=e*(h/2)*(k/ht)*M-(h/2)*A1D*iM.*v'*A1D';
+            Da((i-1)*(N+1)+(1:N+1),(i-1)*(N+1)+(1:N+1))=e*(h/2)*(k/ht)*M-(h/2)*A1D*(iM.*v)*A1D';
     
             Ab(:,en(s4e(j,i),:,1))=Ab(:,en(s4e(j,i),:,1))-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
             Ac(en(s4e(j,i),:,1),:)=Ac(en(s4e(j,i),:,1),:)-e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
@@ -162,13 +163,13 @@ for j=1:size(n4e,1)
     
             if e4s(s4e(j,i),2)==j
                 Ba(:,(i-1)*(N+1)+(N+1:-1:1))=S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
-                Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))-e*(h/2)*(k/ht)*M+(h/2)*A1D*iM.*v'*A1D';
+                Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(N+1:-1:1))-e*(h/2)*(k/ht)*M+(h/2)*A1D*(iM.*v)*A1D';
     
                 Ca((i-1)*(N+1)+(N+1:-1:1),:)=e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
                 Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(N+1:-1:1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M;
             else
                 Ba(:,(i-1)*(N+1)+(1:N+1))=S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2));
-                Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))-e*(h/2)*(k/ht)*M+(h/2)*A1D*iM.*v'*A1D';
+                Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))=Bb(en(s4e(j,i),:,1),(i-1)*(N+1)+(1:N+1))-e*(h/2)*(k/ht)*M+(h/2)*A1D*(iM.*v)*A1D';
     
                 Ca((i-1)*(N+1)+(1:N+1),:)=e*(h/2)*((rx(j)*M*Dr(en(s4e(j,i),:,1),:)+sx(j)*M*Ds(en(s4e(j,i),:,1),:))*n(1)+(ry(j)*M*Dr(en(s4e(j,i),:,1),:)+sy(j)*M*Ds(en(s4e(j,i),:,1),:))*n(2));
                 Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))=Cb((i-1)*(N+1)+(1:N+1),en(s4e(j,i),:,1))-e*(h/2)*(k/ht)*M;
@@ -176,7 +177,7 @@ for j=1:size(n4e,1)
 
             if e4s(s4e(j,i),2)==0
                 da=da-S*e*(h/2)*((rx(j)*Dr(en(s4e(j,i),:,1),:)'*M+sx(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(1)+(ry(j)*Dr(en(s4e(j,i),:,1),:)'*M+sy(j)*Ds(en(s4e(j,i),:,1),:)'*M)*n(2))*ue(c4n2(ind4s(s4e(j,i),:,1),:));
-                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M+(h/2)*A1D*iM.*v'*A1D')*ue(c4n2(ind4s(s4e(j,i),:,1),:));
+                da(en(s4e(j,i),:,1))=da(en(s4e(j,i),:,1))-(-e*(h/2)*(k/ht)*M+(h/2)*A1D*(iM.*v)*A1D')*ue(c4n2(ind4s(s4e(j,i),:,1),:));
             end
         end
     end
