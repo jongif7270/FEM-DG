@@ -13,7 +13,7 @@ end
 %[x,y] = Nodes2D_equi(k);
 [x,y] = Nodes2D(k);
 [r,s] = xytors(x,y);
-[oldc4n,oldn4e,~,~] = mesh_fem_2d_triangle(xl,xr,yl,yr,Mx,My,k);
+[oldc4n,oldn4e,~,~] = mesh_fem_2d_triangle2(xl,xr,yl,yr,Mx,My,k);
 for j=1:2*Mx*My
     c4e = (r(:)+1)/2*oldc4n(oldn4e(j,1),:)+(s(:)+1)/2*oldc4n(oldn4e(j,2),:)-(r(:)+s(:))/2*oldc4n(oldn4e(j,3),:);
     jth=ind4e(j,:);
