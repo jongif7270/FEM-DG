@@ -5,17 +5,19 @@ function [u,V2D,Dr,Ds,c4n2] = HDG10(M,N)
 %% Ex 3.3
 % xl=-4;xr=4;yl=-4;yr=4;Mx=M;My=M;    a=@(x) [0.8,0.6];b=1;e=0.01;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +0.8*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +0.6*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
 
+xl=-4;xr=4;yl=-4;yr=4;Mx=M;My=M;    a=@(x) [(x(:,1).^2).*x(:,2), -x(:,1).*(x(:,2).^2)];b=1;e=0.01;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8)) +(x(:,1).^2).*x(:,2).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,2)+1).^2/8 +-x(:,1).*(x(:,2).^2).*cos(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1).*(x(:,2)+1)/4 +e.*(sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
+
 %% Ex 3.4
 % xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))), -exp(x(:,1)).*x(:,2).*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +pi*exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*cos(pi*x(:,1)).*sin(pi*x(:,2)) +pi*(-exp(x(:,1)).*x(:,2).*sin(x(:,2))).*sin(pi*x(:,1)).*cos(pi*x(:,2)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [(x(:,1).^2).*x(:,2), -x(:,1).*(x(:,2).^2)]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +(x(:,1).^2).*x(:,2).*(pi*cos(pi*x(:,1)).*sin(pi*x(:,2))) -x(:,1).*(x(:,2).^2).*(pi*sin(pi*x(:,1)).*cos(pi*x(:,2))) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+% xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [(x(:,1).^2).*x(:,2), -x(:,1).*(x(:,2).^2)]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +(x(:,1).^2).*x(:,2).*(pi*cos(pi*x(:,1)).*sin(pi*x(:,2))) -x(:,1).*(x(:,2).^2).*(pi*sin(pi*x(:,1)).*cos(pi*x(:,2))) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
 int=1+3/N;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle2(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG2(xl,xr,yl,yr,Mx,My,N);
 [~,in4e,~,~] = mesh_fem_2d_triangle2(xl,xr,yl,yr,Mx,My,int*N);
-[~,~,~,ic4n2,~] = indexforDG2(xl,xr,yl,yr,Mx,My,int*N);
+[iind4e,~,~,ic4n2,~] = indexforDG2(xl,xr,yl,yr,Mx,My,int*N);
 
 [r1D] = JacobiGL(0,0,N);
 [int_r1D] = JacobiGL(0,0,int*N);
@@ -55,15 +57,15 @@ iind4s=edge(in4e,int*N);
 ie4s = computeE4s(in4e);
 is4e = computeS4e(in4e);
 
-inddb1=zeros(size(c4n2,1),1);
-for i=1:size(ind4s,1)
-    if ind4s(i,:,1)==ind4s(i,:,2)
-        inddb1(ind4s(i,:,1))=ind4s(i,:,1);
-    end
-end
-inddb1=nonzeros(sort(inddb1))';
-
-fns2 = setdiff(1:size(c4n2,1),inddb1);
+% inddb1=zeros(size(c4n2,1),1);
+% for i=1:size(ind4s,1)
+%     if ind4s(i,:,1)==ind4s(i,:,2)
+%         inddb1(ind4s(i,:,1))=ind4s(i,:,1);
+%     end
+% end
+% inddb1=nonzeros(sort(inddb1))';
+% 
+% fns2 = setdiff(1:size(c4n2,1),inddb1);
 
 inddb2=zeros(size(e4s,1)*(N+1),1);
 for j=1:size(n4e,1)
@@ -84,11 +86,12 @@ ys = (c4n(n4e(:,2),2)-c4n(n4e(:,3),2))/2;
 J = xr.*ys-xs.*yr;
 rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 
-ae=zeros((int*N+1)*(int*N+2)/2,2,size(in4e,1));
-for j=1:size(in4e,1)
+ae=zeros(size(iind4e,2),2,size(iind4e,1));
+for j=1:size(iind4e,1)
     for l=1:(int*N+1)*(int*N+2)/2
         ae(l,:,j)=a(ic4n2(((int*N+1)*(int*N+2)/2)*(j-1)+l,:));
     end
+    % ae(:,:,j)=a(ic4n2(iind4e(j,:),:));
 end
 
 al=zeros(int*N+1,2,size(ie4s,1));
@@ -97,8 +100,10 @@ for j=1:size(in4e,1)
         for l=1:int*N+1
             al(l,:,is4e(j,i))=a(ic4n2(iind4s(is4e(j,i),l,1),:));
         end
+        % al(:,:,is4e(j,i))=a(ic4n2(iind4s(is4e(j,i),:,1),:));
     end
 end
+
 
 d = zeros(size(ind4e(:),1),1);
 Da=zeros(3*(N+1),3*(N+1));
@@ -119,9 +124,16 @@ for j=1:size(n4e,1)
     Ca=zeros(3*(N+1),(N+1)*(N+2)/2);
     Cb=zeros(3*(N+1),(N+1)*(N+2)/2);
 
+    dx=rx(j)*iDr'+sx(j)*iDs';
+    dy=ry(j)*iDr'+sy(j)*iDs';
+    a1=ae(:,1,j);
+    a2=ae(:,2,j);
+
+    % a1=a1'; a2=a2';
+
     Aa=e*J(j)*((rx(j)^2+ry(j)^2)*Dr'*M2D*Dr+(rx(j)*sx(j)+ry(j)*sy(j))*(Ds'*M2D*Dr+Dr'*M2D*Ds)+(sx(j)^2+sy(j)^2)*Ds'*M2D*Ds)+...
               b*J(j)*M2D+...
-              -J(j)*A2D*(ae(:,1,j).*(rx(j)*iDr'+sx(j)*iDs')*iM2D+ae(:,2,j).*(ry(j)*iDr'+sy(j)*iDs')*iM2D)*A2D';
+              -J(j)*A2D*(a1.*(dx*iM2D)+a2.*(dy*iM2D))*A2D';
     da=J(j)*M2D*f(c4n2(ind4e(j,:),:));
 
     ht=norm(c4n(n4e(j,2),:)-c4n(n4e(j,1),:));
@@ -130,6 +142,9 @@ for j=1:size(n4e,1)
         h=norm(c4n(n4e(j,mod(i,3)+1),:)-c4n(n4e(j,mod(i-1,3)+1),:));
 
         v=al(:,:,is4e(j,i))*n;
+
+        % v=v';
+
         % vp=0;
         % vn=0;
         % for l=1:int*N+1
