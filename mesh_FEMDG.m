@@ -1,14 +1,17 @@
-function [c4n,n4e,ind4e,inddb,ind4s,e4s] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
+function [c4n,n4e,ind4e,inddb,ind4snew,e4s,n4s,en] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
 
-xl=0;
-xr=1;
-yl=0;
-yr=1;
-Mx=8;
-My=8;
-N=8;
+% xl=0;
+% xr=1;
+% yl=0;
+% yr=1;
+% Mx=8;
+% My=8;
+% N=8;
 
 % c4n=zeros(((2*N+1)*(N+1)-N)*Mx*My,2);
+
+% xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
+
 a=linspace(xl,xr,Mx+1);
 b=linspace(yl,yr,My+1);
 c4n=[];
@@ -81,12 +84,15 @@ for j=1:My
     tmp=[tmp 4*((j-1)*Mx)+1 4*(j*Mx-1)+3];
 end
 
-inddb=sort(tmp);
+inddb1=sort(tmp);
 
-e4s = zeros(size(ind4s,1),2);
-for j=1:size(ind4s,1)
+a=ind4s(tmp,:,1);
+inddb=unique(a(:)');
+
+e4s = zeros(Mx*My*4,2);
+for j=1:Mx*My*4
     e4s(j,1)=j;
-    if ismember(j,inddb)==1
+    if ismember(j,inddb1)==1
         e4s(j,2)=0;
     else
         if mod(j,4)==1
@@ -101,4 +107,41 @@ for j=1:size(ind4s,1)
     end
 end
 
+tmp=zeros(Mx*My*4,1);
+for j=1:Mx*My*4
+    if max(e4s(j,1)<e4s(j,2),e4s(j,2)==0)==1
+        tmp(j)=j;
+    else
+        tmp(j)=0;
+    end
+end
+e4s=e4s(nonzeros(tmp),:);
 
+ind4snew=zeros(size(e4s,1),N+1,2);
+for j=1:size(e4s,1)
+    if e4s(j,2)==0
+        ind4snew(j,:,2)=ind4s(e4s(j,1),:);
+    else
+        ind4snew(j,:,2)=flip(ind4s(e4s(j,2),:));
+    end
+end
+ind4snew(:,:,1)=ind4s(e4s(:,1),:);
+
+n4s=[ind4snew(:,1,1) ind4snew(:,end,1)];
+
+e=zeros(1,N+1);
+tmp=0;
+for j=1:N+1
+   e(j)=N+1+tmp;
+   tmp=tmp+(N+1-j);
+end
+
+en=zeros(size(e4s,1),N+1,2);
+for j=1:size(e4s,1)
+    if e4s(j,2)==0
+        en(j,:,2)=e;
+    else
+        en(j,:,2)=flip(e);
+    end
+end
+en(:,:,1)=repmat(e,size(e4s,1),1);

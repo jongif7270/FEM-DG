@@ -33,8 +33,11 @@ rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 
 Kr=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2,size(n4e,1));
 
+M2D=I2D/(V2D*V2D');
+M=I1D/(V1D*V1D');
+
 for j=1:size(n4e,1)
-    M=I2D/(V2D*V2D');
+    % M=I2D/(V2D*V2D');
     Srr=(V2D\Dr)'*(V2D\Dr);
     Srs=(V2D\Dr)'*(V2D\Ds);
     Ssr=(V2D\Ds)'*(V2D\Dr);
@@ -43,7 +46,7 @@ for j=1:size(n4e,1)
     K=J(j)*((rx(j)^2+ry(j)^2)*Srr+(rx(j)*sx(j)+ry(j)*sy(j))*(Srs+Ssr)+(sx(j)^2+sy(j)^2)*Sss);
     Kr(:,:,j)=K;
 
-    b(ind4e(j,:)) = b(ind4e(j,:)) + J(j)*M*f(c4n2(ind4e(j,:),:));
+    b(ind4e(j,:)) = b(ind4e(j,:)) + J(j)*M2D*f(c4n2(ind4e(j,:),:));
 end
 
 ind=ind4e';
@@ -54,10 +57,12 @@ A=sparse(Ir(:),Jr(:),Kr(:));
 en=mod(ind4s(:,:,:)-1,(N+1)*(N+2)/2)+1;
 sigma=4*N^2;
 for j=1:size(e4s,1)
+    n=normal(c4n2(ind4s(j,N+1,1),:)-c4n2(ind4s(j,1,1),:));
+    h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
     if e4s(j,2)~=0
-        n=normal(c4n2(ind4s(j,N+1,1),:)-c4n2(ind4s(j,1,1),:));
-        h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
-        M=I1D/(V1D*V1D');
+        % n=normal(c4n2(ind4s(j,N+1,1),:)-c4n2(ind4s(j,1,1),:));
+        % h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
+        % M=I1D/(V1D*V1D');
 
         A(ind4s(j,:,1),ind4e(e4s(j,1),:))=A(ind4s(j,:,1),ind4e(e4s(j,1),:))+(-1/2)*(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
         A(ind4s(j,:,2),ind4e(e4s(j,1),:))=A(ind4s(j,:,2),ind4e(e4s(j,1),:))+(1/2)*(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
@@ -74,9 +79,9 @@ for j=1:size(e4s,1)
         A(ind4s(j,:,1),ind4s(j,:,2))=A(ind4s(j,:,1),ind4s(j,:,2))-(sigma/h)*(h/2)*M;
         A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))+(sigma/h)*(h/2)*M;
     else
-        n=normal(c4n2(ind4s(j,N+1,1),:)-c4n2(ind4s(j,1,1),:));
-        h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
-        M=I1D/(V1D*V1D');
+        % n=normal(c4n2(ind4s(j,N+1,1),:)-c4n2(ind4s(j,1,1),:));
+        % h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
+        % M=I1D/(V1D*V1D');
 
         A(ind4s(j,:,1),ind4e(e4s(j,1),:))=A(ind4s(j,:,1),ind4e(e4s(j,1),:))-(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
         
@@ -92,4 +97,7 @@ end
 %fns = 1:size(ind4e(:),1);
 % u(fns) = A(fns,fns)\b(fns);
 u=A\b;
-plot3(c4n2(:,1),c4n2(:,2),u,'.')
+% plot3(c4n2(:,1),c4n2(:,2),u,'.')
+T = delaunay(c4n2(:,1),c4n2(:,2));
+trisurf(T,c4n2(:,1),c4n2(:,2),u,"Linestyle","none")
+% spy(A)

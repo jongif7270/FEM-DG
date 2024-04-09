@@ -1,12 +1,13 @@
 function [u,V2D,Dr,Ds,c4n] = FEMDG(M,N)
 
 xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;
+% xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
 
 f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); 
-ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
-u_D=@(x) x(:,1)*0;
+u_D=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+% u_D=@(x) x(:,1)*0;
 
-[c4n,n4e,ind4e,inddb,ind4s,e4s] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
+[c4n,n4e,ind4e,inddb,ind4s,e4s,n4s,en] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
 
 [r1D] = Nodes1D_equi(N);
 [V1D] = Vandermonde1D(N,r1D);
@@ -31,6 +32,7 @@ J = xr.*ys-xs.*yr;
 rx=ys./J; ry=-xs./J; sx=-yr./J; sy=xr./J;
 
 b = zeros(size(c4n,1),1);
+u=b;
 
 S=zeros((N+1)*(N+2)/2,(N+1)*(N+2)/2,size(n4e,1));
 
@@ -44,8 +46,36 @@ Ir=repmat(ind4e,1,(N+1)*(N+2)/2)';
 Jr=(repmat(ind(:),1,(N+1)*(N+2)/2))';
 A=sparse(Ir(:),Jr(:),S(:));
 
+sigma=4*N^2;
+for j=1:size(e4s,1)
+    n=normal(c4n(ind4s(j,end,1),:)-c4n(ind4s(j,1,1),:));
+    h=norm(c4n(n4s(j,2),:)-c4n(n4s(j,1),:));
+    if e4s(j,2)~=0
+        A(ind4s(j,:,1),ind4e(e4s(j,1),:))=A(ind4s(j,:,1),ind4e(e4s(j,1),:))+(-1/2)*(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
+        A(ind4s(j,:,2),ind4e(e4s(j,1),:))=A(ind4s(j,:,2),ind4e(e4s(j,1),:))+(1/2)*(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
+        A(ind4s(j,:,1),ind4e(e4s(j,2),:))=A(ind4s(j,:,1),ind4e(e4s(j,2),:))+(-1/2)*(h/2)*((rx(e4s(j,2))*M*Dr(en(j,:,2),:)+sx(e4s(j,2))*M*Ds(en(j,:,2),:))*n(1)+(ry(e4s(j,2))*M*Dr(en(j,:,2),:)+sy(e4s(j,2))*M*Ds(en(j,:,2),:))*n(2));
+        A(ind4s(j,:,2),ind4e(e4s(j,2),:))=A(ind4s(j,:,2),ind4e(e4s(j,2),:))+(1/2)*(h/2)*((rx(e4s(j,2))*M*Dr(en(j,:,2),:)+sx(e4s(j,2))*M*Ds(en(j,:,2),:))*n(1)+(ry(e4s(j,2))*M*Dr(en(j,:,2),:)+sy(e4s(j,2))*M*Ds(en(j,:,2),:))*n(2));
+
+        A(ind4e(e4s(j,1),:),ind4s(j,:,1))=A(ind4e(e4s(j,1),:),ind4s(j,:,1))+(-1/2)*(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2));
+        A(ind4e(e4s(j,2),:),ind4s(j,:,1))=A(ind4e(e4s(j,2),:),ind4s(j,:,1))+(-1/2)*(h/2)*((rx(e4s(j,2))*Dr(en(j,:,2),:)'*M+sx(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(1)+(ry(e4s(j,2))*Dr(en(j,:,2),:)'*M+sy(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(2));
+        A(ind4e(e4s(j,1),:),ind4s(j,:,2))=A(ind4e(e4s(j,1),:),ind4s(j,:,2))+(1/2)*(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2));
+        A(ind4e(e4s(j,2),:),ind4s(j,:,2))=A(ind4e(e4s(j,2),:),ind4s(j,:,2))+(1/2)*(h/2)*((rx(e4s(j,2))*Dr(en(j,:,2),:)'*M+sx(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(1)+(ry(e4s(j,2))*Dr(en(j,:,2),:)'*M+sy(e4s(j,2))*Ds(en(j,:,2),:)'*M)*n(2));
+
+        A(ind4s(j,:,1),ind4s(j,:,1))=A(ind4s(j,:,1),ind4s(j,:,1))+(sigma/h)*(h/2)*M;
+        A(ind4s(j,:,2),ind4s(j,:,1))=A(ind4s(j,:,2),ind4s(j,:,1))-(sigma/h)*(h/2)*M;
+        A(ind4s(j,:,1),ind4s(j,:,2))=A(ind4s(j,:,1),ind4s(j,:,2))-(sigma/h)*(h/2)*M;
+        A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))+(sigma/h)*(h/2)*M;
+    else
+        A(ind4s(j,:,1),ind4e(e4s(j,1),:))=A(ind4s(j,:,1),ind4e(e4s(j,1),:))-(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
+        
+        A(ind4e(e4s(j,1),:),ind4s(j,:,1))=A(ind4e(e4s(j,1),:),ind4s(j,:,1))-(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2));
+    end
+end
+
 u(inddb) = u_D(c4n(inddb,:));
 u(fns) = A(fns,fns)\b(fns);
+
+% spy(A)
 
 %%
 T = delaunay(c4n(:,1),c4n(:,2));
