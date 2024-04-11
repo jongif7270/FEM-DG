@@ -1,11 +1,15 @@
 function [u,V2D,Dr,Ds,c4n] = FEMDG(M,N)
 
-xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;
-% xl=0;xr=1;yl=0;yr=1;Mx=M;My=M;
+Mx=M;My=M; 
 
-f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); 
-u_D=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
-% u_D=@(x) x(:,1)*0;
+f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+
+% f=@(x) (sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
+
+
+xl=-1;xr=1;yl=-1;yr=1;
+
+% xl=-4;xr=4;yl=-4;yr=4;
 
 [c4n,n4e,ind4e,inddb,ind4s,e4s,n4s,en] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
 
@@ -67,13 +71,15 @@ for j=1:size(e4s,1)
         A(ind4s(j,:,2),ind4s(j,:,2))=A(ind4s(j,:,2),ind4s(j,:,2))+(sigma/h)*(h/2)*M;
     else
         A(ind4s(j,:,1),ind4e(e4s(j,1),:))=A(ind4s(j,:,1),ind4e(e4s(j,1),:))-(h/2)*((rx(e4s(j,1))*M*Dr(en(j,:,1),:)+sx(e4s(j,1))*M*Ds(en(j,:,1),:))*n(1)+(ry(e4s(j,1))*M*Dr(en(j,:,1),:)+sy(e4s(j,1))*M*Ds(en(j,:,1),:))*n(2));
-        
         A(ind4e(e4s(j,1),:),ind4s(j,:,1))=A(ind4e(e4s(j,1),:),ind4s(j,:,1))-(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2));
+
+        b(ind4e(e4s(j,1),:))=b(ind4e(e4s(j,1),:))-(h/2)*((rx(e4s(j,1))*Dr(en(j,:,1),:)'*M+sx(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(1)+(ry(e4s(j,1))*Dr(en(j,:,1),:)'*M+sy(e4s(j,1))*Ds(en(j,:,1),:)'*M)*n(2))*ue(c4n(ind4s(j,:,1),:));
     end
 end
 
-u(inddb) = u_D(c4n(inddb,:));
-u(fns) = A(fns,fns)\b(fns);
+% u(inddb) = ue(c4n(inddb,:));
+% u(fns) = A(fns,fns)\b(fns);
+u = A\b;
 
 % spy(A)
 
