@@ -1,12 +1,12 @@
-function [c4n,n4e,ind4e,inddb,ind4snew,e4s,n4s,en] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
-
+function [c4n,n4e,ind4e,inddb,ind4snew,e4s,s4e,n4s,en,ind4p,s4p,e4p] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
+% 
 % xl=0;
 % xr=1;
 % yl=0;
 % yr=1;
-% Mx=8;
-% My=8;
-% N=8;
+% Mx=2;
+% My=2;
+% N=2;
 
 % c4n=zeros(((2*N+1)*(N+1)-N)*Mx*My,2);
 
@@ -145,3 +145,39 @@ for j=1:size(e4s,1)
     end
 end
 en(:,:,1)=repmat(e,size(e4s,1),1);
+
+s4e=zeros(size(n4e,1),1);
+
+for j = 1:size(n4e,1)
+    for i = 1:size(e4s,1)
+        if isequal(e4s(i,1),j) | isequal(e4s(i,2),j)
+            s4e(j)=i;
+        end
+    end
+end
+
+% c4n2=zeros(4*Mx*My*(k+1)*(k+2),2);
+% [x,y] = Nodes2D(k);
+% [r,s] = xytors(x,y);
+% for j=1:2*Mx*My
+%     c4e = (r(:)+1)/2*c4n(n4e(j,1),:)+(s(:)+1)/2*c4n(n4e(j,2),:)-(r(:)+s(:))/2*c4n(n4e(j,3),:);
+%     jth=ind4e(j,:);
+%     for i=1:(k+1)*(k+2)/2
+%         c4n2(jth(i),:)=c4e(i,:);
+%     end
+% end
+
+ind4p = zeros(Mx*My,size(c4n,1)/(Mx*My));
+for j = 1:Mx*My
+    ind4p(j,:)=(j-1)*size(c4n,1)/(Mx*My) + (1:size(c4n,1)/(Mx*My));
+end
+
+s4p = zeros(Mx*My,4);
+for j = 1:Mx*My
+    s4p(j,:)=s4e((j-1)*4+(1:4));
+end
+
+e4p = zeros(Mx*My,4);
+for j = 1:Mx*My
+    e4p(j,:)=(j-1)*4+(1:4);
+end

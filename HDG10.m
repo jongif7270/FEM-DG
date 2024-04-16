@@ -12,7 +12,7 @@ xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [0.8,0.6];b=1;e=0.01;S=1;k=4*N^2;  f=
 
 % xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;    a=@(x) [(x(:,1).^2).*x(:,2), -x(:,1).*(x(:,2).^2)]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +(x(:,1).^2).*x(:,2).*(pi*cos(pi*x(:,1)).*sin(pi*x(:,2))) -x(:,1).*(x(:,2).^2).*(pi*sin(pi*x(:,1)).*cos(pi*x(:,2))) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-int=1+3/N;
+int=1;
 
 [c4n,n4e,~,~] = mesh_fem_2d_triangle2(xl,xr,yl,yr,Mx,My,N);
 [ind4e,~,~,c4n2,~] = indexforDG2(xl,xr,yl,yr,Mx,My,N);
@@ -105,7 +105,7 @@ for j=1:size(in4e,1)
 end
 
 
-d = zeros(size(ind4e(:),1),1);
+% d = zeros(size(ind4e(:),1),1);
 Da=zeros(3*(N+1),3*(N+1));
 Fr=zeros(3*(N+1),3*(N+1),size(n4e,1));
 Gr=zeros(3*(N+1),size(n4e,1));
@@ -221,7 +221,7 @@ for j=1:size(n4e,1)
     AFr(:,j)=Ar\da;
     ABr(:,:,j)=Ar\Br;
 
-    d(ind4e(j,:))=d(ind4e(j,:))+da;
+    % d(ind4e(j,:))=d(ind4e(j,:))+da;
 end
 
 T=[(s4e(:,1)-1)*(N+1)+(1:N+1) (s4e(:,2)-1)*(N+1)+(1:N+1) (s4e(:,3)-1)*(N+1)+(1:N+1)];
