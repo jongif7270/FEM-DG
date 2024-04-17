@@ -20,7 +20,7 @@ Ma=2.^(1:iter);
 h=1./Ma;
 for i =1:iter
     [~,n4e,ind4e,~,~,~,~,~] = mesh_FEMDG(xl,xr,yl,yr,Ma(i),Ma(i),N);
-    [u,V,Dr,Ds,c4n] = FEMDG(Ma(i),N);
+    [u,V,Dr,Ds,c4n] = FEMHDG2(Ma(i),N);
     error(i)=compute_error_FEMDG(c4n,n4e,ind4e,V,Dr,Ds,u,ux,uy,N);
 end
 %plot(time,error)

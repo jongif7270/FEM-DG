@@ -117,4 +117,4 @@ spy(E);
 %fns = 1:size(ind4e(:),1);
 % u(fns) = A(fns,fns)\b(fns);
 %u=A\b;
-%plot3(c4n2(:,1),c4n2(:,2),u,'.')
+plot3(c4n2(:,1),c4n2(:,2),u,'.')

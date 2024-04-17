@@ -11,7 +11,7 @@ a=@(x) [0.8,0.6];b=1;e=1;S=1;k=4*N^2;  f=@(x) b.*(1+sin(pi.*(x(:,1)+1).*(x(:,2)+
 
 % a=@(x) [exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))), -exp(x(:,1)).*x(:,2).*sin(x(:,2))]; b=0;e=1;S=-1;k=1; f=@(x) b*sin(pi*x(:,1)).*sin(pi*x(:,2)) +pi*exp(x(:,1)).*(x(:,2).*cos(x(:,2))+sin(x(:,2))).*cos(pi*x(:,1)).*sin(pi*x(:,2)) +pi*(-exp(x(:,1)).*x(:,2).*sin(x(:,2))).*sin(pi*x(:,1)).*cos(pi*x(:,2)) +e*2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-[c4n,n4e,ind4e,~,ind4s,e4s,s4e,~,en,ind4p,s4p,e4p] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
+[c4n,n4e,ind4e,~,ind4s,e4s,s4e,~,en,~,~,~] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
 
 % [r1D] = JacobiGL(0,0,N);
 [r1D] = Nodes1D_equi(N);
