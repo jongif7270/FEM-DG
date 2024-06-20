@@ -2,22 +2,24 @@ function [u,V2D,Dr,Ds,c4n] = FEMDG(M,N)
 
 Mx=M;My=M; 
 
-% f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-f=@(x) (sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
+% f=@(x) (sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
 
 
 xl=-1;xr=1;yl=-1;yr=1;
 
 % xl=-4;xr=4;yl=-4;yr=4;
 
-[c4n,n4e,ind4e,inddb,ind4s,e4s,~,n4s,en] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
+[~,n4e,ind4e,inddb,ind4s,e4s,~,n4s,en,~,~,~,c4n] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
 
-[r1D] = Nodes1D_equi(N);
+[r1D] = JacobiGL(0,0,N);
+% [r1D] = Nodes1D_equi(N);
 [V1D] = Vandermonde1D(N,r1D);
 I1D = eye(size(V1D,1));
 
-[x,y]=Nodes2D_equi(N);
+[x,y]=Nodes2D(N);
+% [x,y]=Nodes2D_equi(N);
 [r,s]=xytors(x,y);
 V2D=Vandermonde2D(N,r,s);
 [Dr,Ds]=Dmatrices2D(N,r,s,V2D);

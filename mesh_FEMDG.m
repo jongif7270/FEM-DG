@@ -1,5 +1,5 @@
-function [c4n,n4e,ind4e,inddb,ind4snew,e4s,s4e,n4s,en,ind4p,s4p,e4p] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
-% 
+function [c4n,n4e,ind4e,inddb,ind4snew,e4s,s4e,n4s,en,ind4p,s4p,e4p,c4n2] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N)
+
 % xl=0;
 % xr=1;
 % yl=0;
@@ -180,4 +180,16 @@ end
 e4p = zeros(Mx*My,4);
 for j = 1:Mx*My
     e4p(j,:)=(j-1)*4+(1:4);
+end
+
+
+c4n2=zeros(size(c4n,1),2);
+[x,y] = Nodes2D(N);
+[r,s] = xytors(x,y);
+for j=1:4*Mx*My
+    c4e = (r(:)+1)/2*c4n(n4e(j,2),:)+(s(:)+1)/2*c4n(n4e(j,3),:)-(r(:)+s(:))/2*c4n(n4e(j,1),:);
+    jth=ind4e(j,:);
+    for i=1:(N+1)*(N+2)/2
+        c4n2(jth(i),:)=c4e(i,:);
+    end
 end
