@@ -1,4 +1,4 @@
-function [GUGV,GUV,UGV,UV] = compute_matrix(rx,ry,sx,sy,J,h,n,Dr,Ds,M2D,M)
+function [GUGV,GUV,UGV,UV] = compute_matrix(rx,ry,sx,sy,J,h,n,Dr,Ds,M2D,M,en,sign)
 
 GUGV=zeros(size(M2D,1),size(M2D,2),size(rx,1));
 for i=1:size(rx,1)
@@ -7,7 +7,11 @@ end
 
 GUV=zeros(size(M,1),size(M2D,2),size(rx,1));
 for i=1:size(rx,1)
-    GUV(:,:,i)=(h(i)/2)*M*((rx(i)*Dr([3,5,6],:)+sx(i)*Ds([3,5,6],:))*n(i,1)+(ry(i)*Dr([3,5,6],:)+sy(i)*Ds([3,5,6],:))*n(i,2));
+    if sign(i)==1
+        GUV(:,:,i)=(h(i)/2)*M*((rx(i)*Dr(en(1,:,1),:)+sx(i)*Ds(en(1,:,1),:))*n(i,1)+(ry(i)*Dr(en(1,:,1),:)+sy(i)*Ds(en(1,:,1),:))*n(i,2));
+    else
+        GUV(:,:,i)=flip((h(i)/2)*M*((rx(i)*Dr(en(1,:,1),:)+sx(i)*Ds(en(1,:,1),:))*n(i,1)+(ry(i)*Dr(en(1,:,1),:)+sy(i)*Ds(en(1,:,1),:))*n(i,2)));
+    end
 end
 
 UGV=zeros(size(M2D,1),size(M,2),size(rx,1));
