@@ -2,9 +2,9 @@ function [u,V2D,Dr,Ds,c4n] = FEMHDG4(M,N)
 
 xl=-1;xr=1;yl=-1;yr=1;Mx=M;My=M;
 
-S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
+% S=1;k=4*N^2;  f=@(x) 2*pi^2*sin(pi*x(:,1)).*sin(pi*x(:,2)); ue=@(x) sin(pi*x(:,1)).*sin(pi*x(:,2));
 
-% S=1;k=4*N^2;  f=@(x) (sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
+S=1;k=4*N^2;  f=@(x) (sin(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*(pi^2/16*(x(:,2)+1).^2.*((x(:,1)+1).^2+(x(:,2)+1).^2/4))-cos(pi*(x(:,1)+1).*(x(:,2)+1).^2/8).*pi.*(x(:,1)+1)/4); ue=@(x) 1+sin(pi.*(x(:,1)+1).*(x(:,2)+1).^2/8);
 
 [~,n4e,ind4e,~,ind4s,e4s,s4e,~,en,ind4p,s4p,e4p,c4n] = mesh_FEMDG(xl,xr,yl,yr,Mx,My,N);
 
@@ -62,32 +62,42 @@ end
 
 U=zeros(size(c4n,1),1);
 for i = 1:size(e4p,1)
-    A=sparse(size(ind4p,2),size(ind4p,2));
-    B=sparse(size(ind4p,2),4*(N+1));
+    A=zeros(size(ind4p,2),size(ind4p,2));
+    B=zeros(size(ind4p,2),4*(N+1));
     C=B';
-    D=sparse(4*(N+1),4*(N+1));
-    F=sparse(size(ind4p,2),1);
+    D=zeros(4*(N+1),4*(N+1));
+    F=zeros(size(ind4p,2),1);
+    L=zeros(4*(N+1),1);
     for j = 1:size(e4p,2)
-        A(ind4e(j,:),ind4e(j,:))=GUGV(:,:,j);
-        A(ind4e(j,:),ind4s(j,:,1))=-UGV(:,:,j);
-        A(ind4s(j,:,1),ind4e(j,:))=-GUV(:,:,j);
-        A(ind4s(j,:,1),ind4s(j,:,1))=k/h(e4p(i,j))*UV(:,:,j);
+        A(ind4e(j,:),ind4e(j,:))=A(ind4e(j,:),ind4e(j,:))+GUGV(:,:,e4p(i,j));
+        A(ind4e(j,:),ind4s(j,:,1))=A(ind4e(j,:),ind4s(j,:,1))-UGV(:,:,e4p(i,j));
+        A(ind4s(j,:,1),ind4e(j,:))=A(ind4s(j,:,1),ind4e(j,:))-GUV(:,:,e4p(i,j));
+        A(ind4s(j,:,1),ind4s(j,:,1))=A(ind4s(j,:,1),ind4s(j,:,1))+k/h(e4p(i,j))*UV(:,:,e4p(i,j));
 
-        B(ind4e(j,:),(j-1)*(N+1)+(1:N+1))=S*UGV(:,:,j);
-        B(ind4s(j,:,1),(j-1)*(N+1)+(1:N+1))=-k/h(e4p(i,j))*UV(:,:,j);
+        B(ind4e(j,:),(j-1)*(N+1)+(1:N+1))=B(ind4e(j,:),(j-1)*(N+1)+(1:N+1))+S*UGV(:,:,e4p(i,j));
+        B(ind4s(j,:,1),(j-1)*(N+1)+(1:N+1))=B(ind4s(j,:,1),(j-1)*(N+1)+(1:N+1))-k/h(e4p(i,j))*UV(:,:,e4p(i,j));
 
-        C((j-1)*(N+1)+(1:N+1),ind4e(j,:))=S*GUV(:,:,j);
-        C((j-1)*(N+1)+(1:N+1),ind4s(j,:,1))=-k/h(e4p(i,j))*UV(:,:,j);
+        C((j-1)*(N+1)+(1:N+1),ind4e(j,:))=C((j-1)*(N+1)+(1:N+1),ind4e(j,:))+S*GUV(:,:,e4p(i,j));
+        C((j-1)*(N+1)+(1:N+1),ind4s(j,:,1))=C((j-1)*(N+1)+(1:N+1),ind4s(j,:,1))-k/h(e4p(i,j))*UV(:,:,e4p(i,j));
 
-        D((j-1)*(N+1)+(1:N+1),(j-1)*(N+1)+(1:N+1))=k/h(e4p(i,j))*UV(:,:,j);
+        D((j-1)*(N+1)+(1:N+1),(j-1)*(N+1)+(1:N+1))=D((j-1)*(N+1)+(1:N+1),(j-1)*(N+1)+(1:N+1))+k/h(e4p(i,j))*UV(:,:,e4p(i,j));
 
-        F(ind4e(j,:))=J(j)*M2D*f(c4n(ind4e(e4p(i,j),:),:)); % << dirichlet boundary 설정 / B 와 구성 같음 / ue or g 사용
+        F(ind4e(j,:))=F(ind4e(j,:))+J(e4p(i,j))*M2D*f(c4n(ind4e(e4p(i,j),:),:)); % << dirichlet boundary 설정 / B 와 구성 같음 / ue or g 사용
+        if e4s(s4p(i,j),2)==0
+            F(ind4e(j,:))=F(ind4e(j,:))-S*UGV(:,:,e4p(i,j))*ue(c4n(ind4s(s4e(e4p(i,j)),:,1),:));
+            F(ind4s(j,:,1))=F(ind4s(j,:,1))+k/h(e4p(i,j))*UV(:,:,e4p(i,j))*ue(c4n(ind4s(s4e(e4p(i,j)),:,1),:));
+        end
     end
     invA_F = A\F;
     invA_B = A\B;
-    Lambda = -(-C*invA_B+D)\(C*invA_F); %<<Lambda 계산 시 free nodes 고려 
-    U(ind4p(i,:))=U(ind4p(i,:))+invA_F-invA_B*Lambda;
+    fns=setdiff((1:4*(N+1)),nonzeros(inddb(i,:))');
+    L1=-(-C*invA_B+D);
+    L2=(C*invA_F);
+    L(fns) = L1(fns,fns)\L2(fns);
+    U(ind4p(i,:))=U(ind4p(i,:))+invA_F-invA_B*L;
 end
 
-T = delaunay(c4n(:,1),c4n(:,2));
-trisurf(T,c4n(:,1),c4n(:,2),U,"Linestyle","none")    
+plot3(c4n(:,1),c4n(:,2),U,'.')
+
+% T = delaunay(c4n(:,1),c4n(:,2));
+% trisurf(T,c4n(:,1),c4n(:,2),U,"Linestyle","none")    
